@@ -1,1 +1,4 @@
 backend/venv/*
+frontend/node_modules/*
+backend/src/*/__pycache__/
+backend/src/__pycache__/
