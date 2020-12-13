@@ -25,9 +25,20 @@ db_drop_and_create_all()
     can be used to initialize a clean database
     !!NOTE you can change the database_filename variable to have multiple verisons of a database
 '''
-def db_drop_and_create_all():
+
+
+def db_drop_and_create_all(app):
     db.drop_all()
     db.create_all()
+    with app.app_context():
+        drink = Drink(title='Water', recipe=json.dumps(
+            [{'color': 'Aqua', 'name': 'Water', 'parts': 1}]))
+        drink.insert()
+        drink_2 = Drink(title='Latte', recipe=json.dumps([
+                {'color': 'PapayaWhip', 'name': 'Foam', 'parts': 2},
+                {'color': 'Peru', 'name': 'Esspresso', 'parts': 1},
+                ]))
+        drink_2.insert()
 
 '''
 Drink

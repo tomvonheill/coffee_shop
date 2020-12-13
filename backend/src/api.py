@@ -4,7 +4,7 @@ from sqlalchemy import exc
 import json
 from flask_cors import CORS
 
-from .database.models import db_drop_and_create_all, setup_db, Drink
+from .database.models import db_drop_and_create_all, setup_db, Drink, db
 from .auth.auth import AuthError, requires_auth
 
 app = Flask(__name__)
@@ -16,7 +16,7 @@ CORS(app)
 !! NOTE THIS WILL DROP ALL RECORDS AND START YOUR DB FROM SCRATCH
 !! NOTE THIS MUST BE UNCOMMENTED ON FIRST RUN
 '''
-# db_drop_and_create_all()
+db_drop_and_create_all(app)
 
 ## ROUTES
 '''
@@ -27,6 +27,13 @@ CORS(app)
     returns status code 200 and json {"success": True, "drinks": drinks} where drinks is the list of drinks
         or appropriate status code indicating reason for failure
 '''
+@app.route('/drinks', methods = ['GET'])
+def get_drinks():
+    drinks = [drink.short() for drink in db.session.query(Drink)]
+    if drinks:
+        return {'success':True, 'drinks': drinks}
+    abort(404, description = 'No drinks found it database')
+
 
 
 '''
@@ -86,6 +93,14 @@ def unprocessable(error):
                     "error": 422,
                     "message": "unprocessable"
                     }), 422
+
+@app.errorhandler(404)
+def questions_not_found(error):
+    error_data = {
+        'success' : False,
+        'error' : 404,}
+    error_data['message'] =error.description
+    return jsonify(error_data),404
 
 '''
 @TODO implement error handlers using the @app.errorhandler(error) decorator
