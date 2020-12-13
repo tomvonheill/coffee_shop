@@ -44,6 +44,13 @@ def get_drinks():
     returns status code 200 and json {"success": True, "drinks": drinks} where drinks is the list of drinks
         or appropriate status code indicating reason for failure
 '''
+@app.route('/drinks-detail', methods = ['GET'])
+def get_drinks_detail():
+    drinks = [drink.long() for drink in db.session.query(Drink)]
+    if drinks:
+        return {'success':True, 'drinks': drinks}
+    abort(404, description = 'No drinks found it database')
+
 
 
 '''
