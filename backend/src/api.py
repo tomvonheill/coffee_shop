@@ -5,7 +5,7 @@ import json
 from flask_cors import CORS
 
 from .database.models import db_drop_and_create_all, setup_db, Drink, db
-from .auth.auth import AuthError, requires_auth
+from .auth.auth import AuthError, requires_auth, get_token_auth_header, requires_auth_decorator2
 
 app = Flask(__name__)
 setup_db(app)
@@ -33,6 +33,16 @@ def get_drinks():
     if drinks:
         return {'success':True, 'drinks': drinks}
     abort(404, description = 'No drinks found it database')
+
+@app.route('/test', methods = ['GET'])
+@requires_auth_decorator2
+def my_test(payload):
+    try:
+        print(payload)
+        return 'access granted'
+    except AuthError as e:
+        abort(e.status_code, description = e.error)
+    abort(500)
 
 
 
