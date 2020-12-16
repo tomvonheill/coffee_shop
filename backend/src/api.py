@@ -57,10 +57,10 @@ def my_test(payload):
 '''
 @app.route('/drinks-detail', methods = ['GET'])
 @requires_auth('get:drinks-detail')
-def get_drinks_detail():
+def get_drinks_detail(payload):
     drinks = [drink.long() for drink in db.session.query(Drink)]
     if drinks:
-        return {'success':True, 'drinks': drinks}
+        return json.dumps({'success':True, 'drinks': drinks})
     abort(404, description = 'No drinks found it database')
 
 
@@ -74,6 +74,18 @@ def get_drinks_detail():
     returns status code 200 and json {"success": True, "drinks": drink} where drink an array containing only the newly created drink
         or appropriate status code indicating reason for failure
 '''
+@app.route('/drinks', methods = ['POST'])
+@requires_auth('post:drinks')
+def post_drinks(payload):
+    title = request.get_json().get('title')
+    recipe = request.get_json().get('recipe')
+    if not title:
+        abort(400, description = 'No title was given to new drink')
+    if len(recipe)<1:
+        abort(400, description= 'No recipe was given')
+    drink = Drink(title=title,recipe=json.dumps(recipe))
+    drink.insert()
+    return json.dumps({'success': True, 'drink': drink.long()})
 
 
 '''

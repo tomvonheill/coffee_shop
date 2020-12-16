@@ -39,6 +39,20 @@ def db_drop_and_create_all(app):
                 {'color': 'Peru', 'name': 'Esspresso', 'parts': 1},
                 ]))
         drink_2.insert()
+        drink_3 = Drink(title='matcha shake',
+                        recipe=json.dumps([
+                            {
+                                'name': 'milk',
+                                'color': 'grey',
+                                'parts': 1
+                            },
+                            {
+                                'name': 'matcha',
+                                'color': 'green',
+                                'parts': 3
+                            },
+                        ]))
+        drink_3.insert()
 
 '''
 Drink
