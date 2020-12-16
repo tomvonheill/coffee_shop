@@ -55,7 +55,11 @@ def get_token_auth_header():
     return true otherwise
 '''
 def check_permissions(permission, payload):
-    raise Exception('Not Implemented')
+    if 'permissions' not in payload:
+        raise AuthError(error = 'permission key not in payload', status_code = 400)
+    if permission not in payload['permissions']:
+        raise AuthError(error = 'User does not have permission', status_code = 403)
+    return True
 
 '''
 @TODO implement verify_decode_jwt(token) method
@@ -122,17 +126,8 @@ def requires_auth(permission=''):
         def wrapper(*args, **kwargs):
             token = get_token_auth_header()
             payload = verify_decode_jwt(token)
-            return f(payload, *args, **kwargs)
-            payload = verify_decode_jwt(token)
             check_permissions(permission, payload)
             return f(payload, *args, **kwargs)
 
         return wrapper
     return requires_auth_decorator
-def requires_auth_decorator2(f):
-    @wraps(f)
-    def wrapper(*args, **kwargs):
-        token = get_token_auth_header()
-        payload = verify_decode_jwt(token)
-        return f(payload, *args, **kwargs)
-    return wrapper

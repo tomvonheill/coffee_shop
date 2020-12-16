@@ -5,7 +5,7 @@ import json
 from flask_cors import CORS
 
 from .database.models import db_drop_and_create_all, setup_db, Drink, db
-from .auth.auth import AuthError, requires_auth, get_token_auth_header, requires_auth_decorator2
+from .auth.auth import AuthError, requires_auth, get_token_auth_header
 
 app = Flask(__name__)
 setup_db(app)
@@ -28,14 +28,15 @@ db_drop_and_create_all(app)
         or appropriate status code indicating reason for failure
 '''
 @app.route('/drinks', methods = ['GET'])
-def get_drinks():
+@requires_auth('get:drinks')
+def get_drinks(payload):
     drinks = [drink.short() for drink in db.session.query(Drink)]
     if drinks:
-        return {'success':True, 'drinks': drinks}
+        return json.dumps({'success':True, 'drinks': drinks})
     abort(404, description = 'No drinks found it database')
 
 @app.route('/test', methods = ['GET'])
-@requires_auth_decorator2
+@requires_auth('get:test')
 def my_test(payload):
     try:
         print(payload)
