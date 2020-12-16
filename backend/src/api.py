@@ -119,7 +119,7 @@ def patch_drink(payload, id):
     drink.title = title
     drink.recipe = json.dumps(recipe)
     drink.update()
-    return json.dumps({'success': True, 'drink': drink.long()})
+    return json.dumps({'success': True, 'drinks': drink.long()})
 
 '''
 @TODO implement endpoint
@@ -131,6 +131,16 @@ def patch_drink(payload, id):
     returns status code 200 and json {"success": True, "delete": id} where id is the id of the deleted record
         or appropriate status code indicating reason for failure
 '''
+@app.route('/drinks/<int:id>', methods = ['delete'])
+@requires_auth('delete:drinks')
+def delete_drink(payload, id):
+    drink = Drink.query.get(id)
+    if not drink:
+        abort(404, description=f'No drink of id {id}')
+    
+    drink.delete()
+    drink.update()
+    return json.dumps({'success': True, 'delete':id})
 
 
 ## Error Handling
