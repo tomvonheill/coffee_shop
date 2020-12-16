@@ -99,7 +99,27 @@ def post_drinks(payload):
     returns status code 200 and json {"success": True, "drinks": drink} where drink an array containing only the updated drink
         or appropriate status code indicating reason for failure
 '''
+@app.route('/drinks/<int:id>', methods = ['PATCH'])
+@requires_auth('patch:drinks')
+def patch_drink(payload, id):
+    id = request.get_json().get('id')
+    recipe = request.get_json().get('recipe')
+    title = request.get_json().get('title')
+    if not id:
+        abort(400, description = 'No id given')
+    if not title:
+        abort(400, description = 'No title was given to new drink')
+    if len(recipe)<1:
+        abort(400, description= 'No recipe was given')
 
+    drink = Drink.query.get(id)
+    if not drink:
+        abort(404, description=f'No drink of id {id}')
+    
+    drink.title = title
+    drink.recipe = json.dumps(recipe)
+    drink.update()
+    return json.dumps({'success': True, 'drink': drink.long()})
 
 '''
 @TODO implement endpoint
@@ -133,6 +153,13 @@ def questions_not_found(error):
     error_data['message'] =error.description
     return jsonify(error_data),404
 
+@app.errorhandler(400)
+def questions_not_found(error):
+    error_data = {
+        'success' : False,
+        'error' : 404,}
+    error_data['message'] =error.description
+    return jsonify(error_data),404
 '''
 @TODO implement error handlers using the @app.errorhandler(error) decorator
     each error handler should return (with approprate messages):
