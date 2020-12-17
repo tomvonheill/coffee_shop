@@ -30,10 +30,13 @@ db_drop_and_create_all(app)
 @app.route('/drinks', methods = ['GET'])
 @requires_auth('get:drinks')
 def get_drinks(payload):
-    drinks = [drink.short() for drink in db.session.query(Drink)]
-    if drinks:
-        return json.dumps({'success':True, 'drinks': drinks})
-    abort(404, description = 'No drinks found it database')
+    try:
+        drinks = [drink.short() for drink in db.session.query(Drink)]
+        if drinks:
+            return json.dumps({'success':True, 'drinks': drinks})
+        abort(404, description = 'No drinks found it database')
+    except AuthError as e:
+        abort(e.status_code, description = e.error)
 
 @app.route('/test', methods = ['GET'])
 @requires_auth('get:test')
@@ -58,10 +61,13 @@ def my_test(payload):
 @app.route('/drinks-detail', methods = ['GET'])
 @requires_auth('get:drinks-detail')
 def get_drinks_detail(payload):
-    drinks = [drink.long() for drink in db.session.query(Drink)]
-    if drinks:
-        return json.dumps({'success':True, 'drinks': drinks})
-    abort(404, description = 'No drinks found it database')
+    try:
+        drinks = [drink.long() for drink in db.session.query(Drink)]
+        if drinks:
+            return json.dumps({'success':True, 'drinks': drinks})
+        abort(404, description = 'No drinks found it database')
+    except AuthError as e:
+        abort(e.status_code, description = e.error)
 
 
 
@@ -102,15 +108,10 @@ def post_drinks(payload):
 @app.route('/drinks/<int:id>', methods = ['PATCH'])
 @requires_auth('patch:drinks')
 def patch_drink(payload, id):
-    id = request.get_json().get('id')
-    recipe = request.get_json().get('recipe')
-    title = request.get_json().get('title')
+    recipe = request.get_json().get('recipe', [])
+    title = request.get_json().get('title', '')
     if not id:
         abort(400, description = 'No id given')
-    if not title:
-        abort(400, description = 'No title was given to new drink')
-    if len(recipe)<1:
-        abort(400, description= 'No recipe was given')
 
     drink = Drink.query.get(id)
     if not drink:
@@ -119,7 +120,7 @@ def patch_drink(payload, id):
     drink.title = title
     drink.recipe = json.dumps(recipe)
     drink.update()
-    return json.dumps({'success': True, 'drinks': drink.long()})
+    return json.dumps({'success': True, 'drinks': [drink.long()]})
 
 '''
 @TODO implement endpoint
@@ -170,6 +171,14 @@ def questions_not_found(error):
         'error' : 404,}
     error_data['message'] =error.description
     return jsonify(error_data),404
+
+@app.errorhandler(AuthError)
+def questions_not_found(error):
+    error_data = {
+        'success' : False,
+        'error' : error.status_code,}
+    error_data['message'] =error.error
+    return jsonify(error_data),error.status_code
 '''
 @TODO implement error handlers using the @app.errorhandler(error) decorator
     each error handler should return (with approprate messages):

@@ -56,9 +56,9 @@ def get_token_auth_header():
 '''
 def check_permissions(permission, payload):
     if 'permissions' not in payload:
-        raise AuthError(error = 'permission key not in payload', status_code = 400)
+        raise AuthError(error = 'permission key not in payload', status_code = 401)
     if permission not in payload['permissions']:
-        raise AuthError(error = 'User does not have permission', status_code = 403)
+        raise AuthError(error = 'User does not have permission', status_code = 401)
     return True
 
 '''
@@ -107,7 +107,7 @@ def verify_decode_jwt(token):
             raise AuthError(error = 'Incorrect claims. Please, check the audience and issuer.', status_code = 401)
         except Exception:
             raise AuthError(error = 'Unable to parse authentication token.', status_code = 400)
-    raise AuthError(error = 'Unable to find the appropriate key.', status_code = 400)
+    raise AuthError(error = 'Unable to find the appropriate key.', status_code = 401)
         
 
 '''
