@@ -28,26 +28,11 @@ db_drop_and_create_all(app)
         or appropriate status code indicating reason for failure
 '''
 @app.route('/drinks', methods = ['GET'])
-@requires_auth('get:drinks')
-def get_drinks(payload):
-    try:
-        drinks = [drink.short() for drink in db.session.query(Drink)]
-        if drinks:
-            return json.dumps({'success':True, 'drinks': drinks})
-        abort(404, description = 'No drinks found it database')
-    except AuthError as e:
-        abort(e.status_code, description = e.error)
-
-@app.route('/test', methods = ['GET'])
-@requires_auth('get:test')
-def my_test(payload):
-    try:
-        print(payload)
-        return 'access granted'
-    except AuthError as e:
-        abort(e.status_code, description = e.error)
-    abort(500)
-
+def get_drinks():
+    drinks = [drink.short() for drink in db.session.query(Drink)]
+    if drinks:
+        return json.dumps({'success':True, 'drinks': drinks})
+    abort(404, description = 'No drinks found it database')
 
 
 '''
